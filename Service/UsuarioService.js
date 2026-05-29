@@ -24,7 +24,8 @@ class UsuarioService {
         const novoUsuario = {
             id: ID,
             nome: dados.nome,
-            email: dados.email
+            email: dados.email,
+            admin: false
         };
         ID++
         return this.usuarioRepository.criar(
@@ -62,6 +63,18 @@ class UsuarioService {
             email: usuario.email,
             livrosLidos
         };
+    }
+
+    alterarAdmin(id) {
+
+        const usuario =
+            this.usuarioRepository.alterarAdmin(id);
+
+        if (!usuario) {
+            throw new Error("Usuário não encontrado");
+        }
+
+        return usuario;
     }
 
 }

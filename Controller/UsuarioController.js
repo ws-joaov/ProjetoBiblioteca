@@ -53,6 +53,27 @@ class UsuarioController {
 
     };
 
+    alterarAdmin = (req, res) => {
+
+        try {
+
+            const resultado =
+                this.usuarioService.alterarAdmin(
+                    req.params.id
+                );
+
+            return res.json(resultado);
+
+        } catch (error) {
+
+            return res.status(404).json({
+                erro: error.message
+            });
+
+        }
+
+    };
+
 }
 
 module.exports = UsuarioController;

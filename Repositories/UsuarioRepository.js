@@ -17,6 +17,20 @@ class UsuarioRepository {
         );
     }
 
+    alterarAdmin(id) {
+
+        const usuario =
+            this.buscarPorId(id);
+
+        if (!usuario) {
+            return null;
+        }
+
+        usuario.admin = !usuario.admin;
+
+        return usuario;
+    }
+
 }
 
 module.exports = UsuarioRepository;

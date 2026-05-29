@@ -10,5 +10,7 @@ module.exports = (usuarioController) => {
 
     router.get("/:id", usuarioController.buscarPorId);
 
+    router.patch("/:id/admin",usuarioController.alterarAdmin);
+
     return router;
 };

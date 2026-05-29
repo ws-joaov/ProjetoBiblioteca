@@ -1,16 +1,15 @@
 let ID = 1
 class AvaliacaoService {
 
-    constructor(avaliacaoRepository, usuarioRepository) {
+    constructor(avaliacaoRepository, usuarioRepository, livroRepository) {
         this.avaliacaoRepository = avaliacaoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.livroRepository = livroRepository;
+
     }
 
     criar(dados) {
 
-        if (!dados.livro) {
-            throw new Error("Livro obrigatório");
-        }
 
         if (!dados.descricao) {
             throw new Error("Descrição obrigatória");
@@ -48,7 +47,7 @@ class AvaliacaoService {
 
         const novaAvaliacao = {
             id: ID,
-            livro: dados.livro,
+            livro: dados.livroId,
             nota: dados.nota,
             descricao: dados.descricao,
             usuarioId: dados.usuarioId
@@ -58,9 +57,32 @@ class AvaliacaoService {
     }
 
     listar() {
-        return this.avaliacaoRepository.listar();
-    }
 
+        const avaliacoes =
+            this.avaliacaoRepository.listar();
+
+        return avaliacoes.map(avaliacao => {
+
+            const usuario =
+                this.usuarioRepository.buscarPorId(
+                    avaliacao.usuarioId
+                );
+
+            const livro =
+                this.livroRepository.buscarPorId(
+                    avaliacao.livroId
+                );
+
+            return {
+                id: avaliacao.id,
+                livro: livro?.nome,
+                usuario: usuario?.nome,
+                nota: avaliacao.nota,
+                descricao: avaliacao.descricao
+            };
+
+        });
+    }
 
 }
 
