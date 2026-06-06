@@ -8,7 +8,7 @@ class AvaliacaoService {
 
     }
 
-    criar(dados) {
+    async criar(dados) {
 
 
         if (!dados.descricao) {
@@ -25,7 +25,7 @@ class AvaliacaoService {
 
 
         const usuarioExiste =
-            this.usuarioRepository.buscarPorId(dados.usuarioId);
+            await this.usuarioRepository.buscarPorId(dados.usuarioId);
 
         if (!usuarioExiste) {
             throw new Error("Usuário não encontrado");
@@ -36,9 +36,9 @@ class AvaliacaoService {
         }
 
         const avaliacaoExiste =
-            this.avaliacaoRepository.buscarPorUsuarioELivro(
+            await this.avaliacaoRepository.buscarPorUsuarioELivro(
                 dados.usuarioId,
-                dados.livro
+                dados.livroId
             );
 
         if (avaliacaoExiste) {
@@ -47,29 +47,29 @@ class AvaliacaoService {
 
         const novaAvaliacao = {
             id: ID,
-            livro: dados.livroId,
+            livroId: dados.livroId,
             nota: dados.nota,
             descricao: dados.descricao,
             usuarioId: dados.usuarioId
         };
         ID++
-        return this.avaliacaoRepository.criar(novaAvaliacao);
+        return await this.avaliacaoRepository.criar(novaAvaliacao);
     }
 
-    listar() {
+    async listar() {
 
         const avaliacoes =
-            this.avaliacaoRepository.listar();
+            await this.avaliacaoRepository.listar();
 
-        return avaliacoes.map(avaliacao => {
+        return Promise.all(avaliacoes.map(async avaliacao => {
 
             const usuario =
-                this.usuarioRepository.buscarPorId(
+                await this.usuarioRepository.buscarPorId(
                     avaliacao.usuarioId
                 );
 
             const livro =
-                this.livroRepository.buscarPorId(
+                await this.livroRepository.buscarPorId(
                     avaliacao.livroId
                 );
 
@@ -81,7 +81,7 @@ class AvaliacaoService {
                 descricao: avaliacao.descricao
             };
 
-        });
+        }));
     }
 
 }

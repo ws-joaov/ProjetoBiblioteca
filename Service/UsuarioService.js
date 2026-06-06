@@ -11,7 +11,7 @@ class UsuarioService {
             avaliacaoRepository;
     }
 
-    criar(dados) {
+    async criar(dados) {
 
         if (!dados.nome) {
             throw new Error("Nome obrigatório");
@@ -28,31 +28,31 @@ class UsuarioService {
             admin: false
         };
         ID++
-        return this.usuarioRepository.criar(
+        return await this.usuarioRepository.criar(
             novoUsuario
         );
     }
 
-    listar() {
-        return this.usuarioRepository.listar();
+    async listar() {
+        return await this.usuarioRepository.listar();
     }
 
-    buscarPorId(id) {
+    async buscarPorId(id) {
 
         const usuario =
-            this.usuarioRepository.buscarPorId(id);
+            await this.usuarioRepository.buscarPorId(id);
 
         if (!usuario) {
             throw new Error("Usuário não encontrado");
         }
 
         const avaliacoes =
-            this.avaliacaoRepository
+            await this.avaliacaoRepository
                 .buscarPorUsuario(Number(id));
 
         const livrosLidos =
             avaliacoes.map(avaliacao => ({
-                livro: avaliacao.livro,
+                livro: avaliacao.livroId,
                 nota: avaliacao.nota,
                 descricao: avaliacao.descricao
             }));
@@ -65,10 +65,10 @@ class UsuarioService {
         };
     }
 
-    alterarAdmin(id) {
+    async alterarAdmin(id) {
 
         const usuario =
-            this.usuarioRepository.alterarAdmin(id);
+            await this.usuarioRepository.alterarAdmin(id);
 
         if (!usuario) {
             throw new Error("Usuário não encontrado");

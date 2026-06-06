@@ -1,34 +1,86 @@
-const db = require("../database/memoryDatabase");
+const db = require("../Database/dataBase");
 
 class UsuarioRepository {
 
-    criar(usuario) {
-        db.usuarios.push(usuario);
-        return usuario;
+    async criar(usuario) {
+        return new Promise((resolve, reject) => {
+            db.run(
+                "INSERT INTO usuarios (nome, email, admin) VALUES (?, ?, ?)",
+                [usuario.nome, usuario.email, usuario.admin ? 1 : 0],
+                function (err) {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    resolve({
+                        id: this.lastID,
+                        ...usuario,
+                        admin: Boolean(usuario.admin)
+                    });
+                }
+            );
+        });
     }
 
-    listar() {
-        return db.usuarios;
+    async listar() {
+        return new Promise((resolve, reject) => {
+            db.all("SELECT * FROM usuarios", (err, rows) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                resolve(rows.map(usuario => ({
+                    ...usuario,
+                    admin: Boolean(usuario.admin)
+                })));
+            });
+        });
     }
 
-    buscarPorId(id) {
-        return db.usuarios.find(
-            usuario => usuario.id === Number(id)
-        );
+    async buscarPorId(id) {
+        return new Promise((resolve, reject) => {
+            db.get("SELECT * FROM usuarios WHERE id = ?", [id], (err, row) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                if (!row) {
+                    return resolve(null);
+                }
+
+                resolve({
+                    ...row,
+                    admin: Boolean(row.admin)
+                });
+            });
+        });
     }
 
-    alterarAdmin(id) {
-
-        const usuario =
-            this.buscarPorId(id);
+    async alterarAdmin(id) {
+        const usuario = await this.buscarPorId(id);
 
         if (!usuario) {
             return null;
         }
 
-        usuario.admin = !usuario.admin;
+        const novoAdmin = usuario.admin ? 0 : 1;
 
-        return usuario;
+        return new Promise((resolve, reject) => {
+            db.run(
+                "UPDATE usuarios SET admin = ? WHERE id = ?",
+                [novoAdmin, id],
+                function (err) {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    resolve({
+                        ...usuario,
+                        admin: Boolean(novoAdmin)
+                    });
+                }
+            );
+        });
     }
 
 }

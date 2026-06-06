@@ -4,12 +4,12 @@ class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    criar = (req, res) => {
+    criar = async (req, res) => {
 
         try {
 
             const resultado =
-                this.usuarioService.criar(req.body);
+                await this.usuarioService.criar(req.body);
 
             return res.status(201).json(resultado);
 
@@ -23,21 +23,21 @@ class UsuarioController {
 
     };
 
-    listar = (req, res) => {
+    listar = async (req, res) => {
 
         const usuarios =
-            this.usuarioService.listar();
+            await this.usuarioService.listar();
 
         return res.json(usuarios);
 
     };
 
-    buscarPorId = (req, res) => {
+    buscarPorId = async (req, res) => {
 
         try {
 
             const usuario =
-                this.usuarioService.buscarPorId(
+                await this.usuarioService.buscarPorId(
                     req.params.id
                 );
 
@@ -53,12 +53,12 @@ class UsuarioController {
 
     };
 
-    alterarAdmin = (req, res) => {
+    alterarAdmin = async (req, res) => {
 
         try {
 
             const resultado =
-                this.usuarioService.alterarAdmin(
+                await this.usuarioService.alterarAdmin(
                     req.params.id
                 );
 

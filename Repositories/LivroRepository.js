@@ -1,20 +1,48 @@
-const db = require("../database/memoryDatabase");
+const db = require("../Database/dataBase");
 
 class LivroRepository {
 
-    criar(livro) {
-        db.livros.push(livro);
-        return livro;
+    async criar(livro) {
+        return new Promise((resolve, reject) => {
+            db.run(
+                "INSERT INTO livros (nome, autor, editora, genero) VALUES (?, ?, ?, ?)",
+                [livro.nome, livro.autor, livro.editora, livro.genero],
+                function (err) {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    resolve({
+                        id: this.lastID,
+                        ...livro
+                    });
+                }
+            );
+        });
     }
 
-    listar() {
-        return db.livros;
+    async listar() {
+        return new Promise((resolve, reject) => {
+            db.all("SELECT * FROM livros", (err, rows) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                resolve(rows);
+            });
+        });
     }
 
-    buscarPorId(id) {
-        return db.livros.find(
-            livro => livro.id === Number(id)
-        );
+    async buscarPorId(id) {
+        return new Promise((resolve, reject) => {
+            db.get("SELECT * FROM livros WHERE id = ?", [id], (err, row) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                resolve(row || null);
+            });
+        });
     }
 
 }

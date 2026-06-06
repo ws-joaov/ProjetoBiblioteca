@@ -4,12 +4,12 @@ class LivroController {
         this.livroService = livroService;
     }
 
-    criar = (req, res) => {
+    criar = async (req, res) => {
 
         try {
 
             const resultado =
-                this.livroService.criar(req.body);
+                await this.livroService.criar(req.body);
 
             return res.status(201).json(resultado);
 
@@ -23,21 +23,21 @@ class LivroController {
 
     };
 
-    listar = (req, res) => {
+    listar = async (req, res) => {
 
         const livros =
-            this.livroService.listar();
+            await this.livroService.listar();
 
         return res.json(livros);
 
     };
 
-    buscarPorId = (req, res) => {
+    buscarPorId = async (req, res) => {
 
         try {
 
             const livro =
-                this.livroService.buscarPorId(
+                await this.livroService.buscarPorId(
                     req.params.id
                 );
 

@@ -1,28 +1,65 @@
-const db = require("../database/memoryDatabase");
+const db = require("../Database/dataBase");
 
 class AvaliacaoRepository {
 
-    criar(avaliacao) {
-        db.avaliacoes.push(avaliacao);
-        return avaliacao;
+    async criar(avaliacao) {
+        return new Promise((resolve, reject) => {
+            db.run(
+                "INSERT INTO avaliacoes (usuarioId, livroId, nota, descricao) VALUES (?, ?, ?, ?)",
+                [avaliacao.usuarioId, avaliacao.livroId ?? avaliacao.livro, avaliacao.nota, avaliacao.descricao],
+                function (err) {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    resolve({
+                        id: this.lastID,
+                        ...avaliacao,
+                        livroId: avaliacao.livroId ?? avaliacao.livro
+                    });
+                }
+            );
+        });
     }
 
-    listar() {
-        return db.avaliacoes;
+    async listar() {
+        return new Promise((resolve, reject) => {
+            db.all("SELECT * FROM avaliacoes", (err, rows) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                resolve(rows);
+            });
+        });
     }
 
-    buscarPorUsuario(usuarioId) {
-        return db.avaliacoes.filter(
-            avaliacao => avaliacao.usuarioId === usuarioId
-        );
+    async buscarPorUsuario(usuarioId) {
+        return new Promise((resolve, reject) => {
+            db.all("SELECT * FROM avaliacoes WHERE usuarioId = ?", [usuarioId], (err, rows) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                resolve(rows);
+            });
+        });
     }
 
-    buscarPorUsuarioELivro(usuarioId, livro) {
-        return db.avaliacoes.find(
-            avaliacao =>
-                avaliacao.usuarioId === usuarioId &&
-                avaliacao.livro === livro
-        );
+    async buscarPorUsuarioELivro(usuarioId, livroId) {
+        return new Promise((resolve, reject) => {
+            db.get(
+                "SELECT * FROM avaliacoes WHERE usuarioId = ? AND livroId = ?",
+                [usuarioId, livroId],
+                (err, row) => {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    resolve(row || null);
+                }
+            );
+        });
     }
 
 }

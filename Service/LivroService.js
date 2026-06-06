@@ -17,10 +17,10 @@ class LivroService {
             avaliacaoRepository;
     }
 
-    criar(dados) {
+    async criar(dados) {
 
         const usuario =
-            this.usuarioRepository.buscarPorId(
+            await this.usuarioRepository.buscarPorId(
                 dados.usuarioId
             );
 
@@ -44,28 +44,28 @@ class LivroService {
             genero: dados.genero
         };
         ID++
-        return this.livroRepository
+        return await this.livroRepository
             .criar(novoLivro);
     }
 
-    listar() {
-        return this.livroRepository.listar();
+    async listar() {
+        return await this.livroRepository.listar();
     }
 
-    buscarPorId(id) {
+    async buscarPorId(id) {
 
         const livro =
-            this.livroRepository.buscarPorId(id);
+            await this.livroRepository.buscarPorId(id);
 
         if (!livro) {
             throw new Error("Livro não encontrado");
         }
 
         const avaliacoes =
-            this.avaliacaoRepository.listar()
+            (await this.avaliacaoRepository.listar())
                 .filter(
                     avaliacao =>
-                        avaliacao.livro === Number(id)
+                        avaliacao.livroId === Number(id)
                 );
 
         return {

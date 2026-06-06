@@ -4,12 +4,12 @@ class AvaliacaoController {
         this.avaliacaoService = avaliacaoService;
     }
 
-    criar = (req, res) => {
+    criar = async (req, res) => {
 
         try {
 
             const resultado =
-                this.avaliacaoService.criar(req.body);
+                await this.avaliacaoService.criar(req.body);
 
             return res.status(201).json(resultado);
 
@@ -23,10 +23,10 @@ class AvaliacaoController {
 
     };
 
-    listar = (req, res) => {
+    listar = async (req, res) => {
 
         const resultado =
-            this.avaliacaoService.listar();
+            await this.avaliacaoService.listar();
 
         return res.json(resultado);
 

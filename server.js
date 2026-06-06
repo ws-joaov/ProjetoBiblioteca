@@ -1,3 +1,5 @@
+require("./Database/initDatabase");
+
 const express = require("express");
 
 
