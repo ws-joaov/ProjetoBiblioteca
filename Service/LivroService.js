@@ -1,4 +1,3 @@
-ID = 1
 class LivroService {
 
     constructor(
@@ -37,15 +36,12 @@ class LivroService {
         }
 
         const novoLivro = {
-            id: ID,
             nome: dados.nome,
             autor: dados.autor,
             editora: dados.editora,
             genero: dados.genero
         };
-        ID++
-        return await this.livroRepository
-            .criar(novoLivro);
+        return await this.livroRepository.criar(novoLivro);
     }
 
     async listar() {

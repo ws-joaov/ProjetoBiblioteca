@@ -1,0 +1,33 @@
+$kind: http-request
+name: 'Criar Avaliacao - Sem Descricao'
+method: POST
+url: '{{base_url}}/avaliacoes'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nota": 4,
+      "usuarioId": 2,
+      "livroId": 1
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 400", function () {
+        pm.response.to.have.status(400);
+      });
+
+      pm.test("Response has erro field", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("erro");
+      });
+
+      pm.test("erro contains Descrição obrigatória", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData.erro).to.include("Descrição obrigatória");
+      });

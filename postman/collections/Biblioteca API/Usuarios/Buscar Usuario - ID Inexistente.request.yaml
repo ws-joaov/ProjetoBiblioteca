@@ -1,0 +1,17 @@
+$kind: http-request
+name: 'Buscar Usuario - ID Inexistente'
+method: GET
+url: '{{base_url}}/usuarios/9999'
+order: 6000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 404", function () {
+        pm.response.to.have.status(404);
+      });
+
+      pm.test("Response has erro field", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("erro");
+      });
