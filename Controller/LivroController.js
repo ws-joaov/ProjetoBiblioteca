@@ -23,6 +23,16 @@ class LivroController {
 
     };
 
+deletar = async (req, res) => {
+        try {
+            const { id } = req.params;
+            await this.livroService.deletar(id);
+            return res.status(200).json({ mensagem: "Livro e avaliações associadas foram removidos com sucesso" });
+        } catch (error) {
+            return res.status(400).json({ erro: error.message });
+        }
+    };
+    
     listar = async (req, res) => {
 
         const livros =

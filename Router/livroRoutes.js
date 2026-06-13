@@ -10,5 +10,7 @@ module.exports = (livroController) => {
 
     router.get("/:id", livroController.buscarPorId);
 
+    router.delete("/:id", livroController.deletar);
+
     return router;
 };

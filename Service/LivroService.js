@@ -60,6 +60,16 @@ class LivroService {
         return await this.livroRepository.listar();
     }
 
+async deletar(id) {
+        const livro = await this.livroRepository.buscarPorId(id);
+
+        if (!livro) {
+            throw new Error("Livro não encontrado para exclusão");
+        }
+
+        return await this.livroRepository.deletar(id);
+    }
+
     async buscarPorId(id) {
 
         const livro =

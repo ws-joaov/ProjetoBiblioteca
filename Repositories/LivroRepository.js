@@ -21,6 +21,17 @@ class LivroRepository {
         });
     }
 
+    async deletar(id) {
+        return new Promise((resolve, reject) => {
+            db.run("DELETE FROM livros WHERE id = ?", [id], function (err) {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(this.changes);
+            });
+        });
+    }
+
     async listar() {
         return new Promise((resolve, reject) => {
             db.all("SELECT * FROM livros", (err, rows) => {
@@ -44,7 +55,7 @@ class LivroRepository {
             });
         });
     }
-    
+
 async buscarPorDetalhes(nome, autor, editora, genero) {
         return new Promise((resolve, reject) => {
             db.get(

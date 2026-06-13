@@ -1,21 +1,19 @@
 $kind: http-request
 name: Criar Usuario
 method: POST
-url: '{{base_url}}/usuarios'
+url: "{{base_url}}/usuarios"
 order: 1000
 headers:
-  - key: Content-Type
-    value: application/json
+  Content-Type: application/json
 body:
   type: json
   content: |-
     {
-      "nome": "João Silva",
-      "email": "joao@email.com"
+      "nome": "Teste",
+      "email": "Teste@email.com"
     }
 scripts:
   - type: afterResponse
-    language: text/javascript
     code: |-
       pm.test("Status code is 201", function () {
         pm.response.to.have.status(201);
@@ -40,3 +38,4 @@ scripts:
         var jsonData = pm.response.json();
         pm.expect(jsonData.admin).to.eql(false);
       });
+    language: text/javascript

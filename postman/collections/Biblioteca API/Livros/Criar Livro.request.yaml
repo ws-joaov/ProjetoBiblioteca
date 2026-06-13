@@ -1,11 +1,9 @@
 $kind: http-request
-name: Criar Livro
 method: POST
-url: '{{base_url}}/livros'
+url: "{{base_url}}/livros"
 order: 1000
 headers:
-  - key: Content-Type
-    value: application/json
+  Content-Type: application/json
 body:
   type: json
   content: |-
@@ -18,7 +16,6 @@ body:
     }
 scripts:
   - type: afterResponse
-    language: text/javascript
     code: |-
       pm.test("Status code is 201", function () {
         pm.response.to.have.status(201);
@@ -38,3 +35,4 @@ scripts:
         var jsonData = pm.response.json();
         pm.expect(jsonData.autor).to.eql("Machado de Assis");
       });
+    language: text/javascript
