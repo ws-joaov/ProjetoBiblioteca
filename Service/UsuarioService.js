@@ -1,5 +1,3 @@
-let ID = 1
-
 class UsuarioService {
 
     constructor(
@@ -22,12 +20,10 @@ class UsuarioService {
         }
 
         const novoUsuario = {
-            id: ID,
             nome: dados.nome,
             email: dados.email,
             admin: false
         };
-        ID++
         return await this.usuarioRepository.criar(
             novoUsuario
         );
