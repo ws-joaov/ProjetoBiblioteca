@@ -35,6 +35,18 @@ class LivroService {
             );
         }
 
+        const livroExiste = 
+            await this.livroRepository.buscarPorDetalhes(
+                dados.nome, 
+                dados.autor, 
+                dados.editora, 
+                dados.genero
+            );
+
+        if (livroExiste) {
+            throw new Error("Este livro já está cadastrado no sistema");
+        }
+
         const novoLivro = {
             nome: dados.nome,
             autor: dados.autor,
