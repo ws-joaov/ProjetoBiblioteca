@@ -1,0 +1,35 @@
+$kind: http-request
+name: 'Criar Livro - Usuario Inexistente'
+method: POST
+url: '{{base_url}}/livros'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nome": "Livro Teste",
+      "autor": "Autor",
+      "editora": "Editora",
+      "genero": "Ficção",
+      "usuarioId": 9999
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 400", function () {
+        pm.response.to.have.status(400);
+      });
+
+      pm.test("Response has erro field", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("erro");
+      });
+
+      pm.test("erro contains Usuário não encontrado", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData.erro).to.include("Usuário não encontrado");
+      });

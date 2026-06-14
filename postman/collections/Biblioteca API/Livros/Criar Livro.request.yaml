@@ -1,0 +1,38 @@
+$kind: http-request
+method: POST
+url: "{{base_url}}/livros"
+order: 1000
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nome": "Dom Casmurro",
+      "autor": "Machado de Assis",
+      "editora": "Editora Globo",
+      "genero": "Romance",
+      "usuarioId": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () {
+        pm.response.to.have.status(201);
+      });
+
+      pm.test("Response has id field", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("id");
+      });
+
+      pm.test("Response has nome equal to Dom Casmurro", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData.nome).to.eql("Dom Casmurro");
+      });
+
+      pm.test("Response has autor equal to Machado de Assis", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData.autor).to.eql("Machado de Assis");
+      });
+    language: text/javascript

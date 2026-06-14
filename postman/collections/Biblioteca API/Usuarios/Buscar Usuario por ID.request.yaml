@@ -1,0 +1,33 @@
+$kind: http-request
+name: Buscar Usuario por ID
+method: GET
+url: '{{base_url}}/usuarios/1'
+order: 5000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Response has id field", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("id");
+      });
+
+      pm.test("Response has nome field", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("nome");
+      });
+
+      pm.test("Response has email field", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("email");
+      });
+
+      pm.test("Response has livrosLidos field that is an array", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("livrosLidos");
+        pm.expect(jsonData.livrosLidos).to.be.an("array");
+      });

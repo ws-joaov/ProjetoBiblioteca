@@ -1,0 +1,41 @@
+$kind: http-request
+name: Criar Usuario
+method: POST
+url: "{{base_url}}/usuarios"
+order: 1000
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nome": "Teste",
+      "email": "Teste@email.com"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () {
+        pm.response.to.have.status(201);
+      });
+
+      pm.test("Response has id field", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("id");
+      });
+
+      pm.test("Response has nome equal to João Silva", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData.nome).to.eql("João Silva");
+      });
+
+      pm.test("Response has email equal to joao@email.com", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData.email).to.eql("joao@email.com");
+      });
+
+      pm.test("Response has admin equal to false", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData.admin).to.eql(false);
+      });
+    language: text/javascript

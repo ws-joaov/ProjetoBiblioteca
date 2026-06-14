@@ -1,4 +1,3 @@
-ID = 1
 class LivroService {
 
     constructor(
@@ -36,20 +35,39 @@ class LivroService {
             );
         }
 
+        const livroExiste = 
+            await this.livroRepository.buscarPorDetalhes(
+                dados.nome, 
+                dados.autor, 
+                dados.editora, 
+                dados.genero
+            );
+
+        if (livroExiste) {
+            throw new Error("Este livro já está cadastrado no sistema");
+        }
+
         const novoLivro = {
-            id: ID,
             nome: dados.nome,
             autor: dados.autor,
             editora: dados.editora,
             genero: dados.genero
         };
-        ID++
-        return await this.livroRepository
-            .criar(novoLivro);
+        return await this.livroRepository.criar(novoLivro);
     }
 
     async listar() {
         return await this.livroRepository.listar();
+    }
+
+async deletar(id) {
+        const livro = await this.livroRepository.buscarPorId(id);
+
+        if (!livro) {
+            throw new Error("Livro não encontrado para exclusão");
+        }
+
+        return await this.livroRepository.deletar(id);
     }
 
     async buscarPorId(id) {

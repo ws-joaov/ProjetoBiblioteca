@@ -1,0 +1,28 @@
+$kind: http-request
+name: Buscar Livro por ID
+method: GET
+url: '{{base_url}}/livros/1'
+order: 5000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Response has id field", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("id");
+      });
+
+      pm.test("Response has nome field", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("nome");
+      });
+
+      pm.test("Response has avaliacoes field that is an array", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property("avaliacoes");
+        pm.expect(jsonData.avaliacoes).to.be.an("array");
+      });

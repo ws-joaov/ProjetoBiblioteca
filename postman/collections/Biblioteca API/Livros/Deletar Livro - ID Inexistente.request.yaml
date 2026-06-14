@@ -1,0 +1,5 @@
+$kind: http-request
+name: Deletar Livro - ID Inexistente
+url: "{{base_url}}/livros/999"
+method: DELETE
+order: 3078276072773597

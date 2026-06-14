@@ -1,5 +1,8 @@
 const db = require("./dataBase");
 
+// 1. ATIVA O SUPORTE A FOREIGN KEYS E CASCADE NO SQLITE
+db.run("PRAGMA foreign_keys = ON;");
+
 db.serialize(() => {
 
     db.run(`
@@ -22,6 +25,12 @@ db.serialize(() => {
     `);
 
     db.run(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_livro_unico
+    ON livros (nome, autor, editora, genero)
+`);
+
+// 2. ADICIONADA A REGRA DE CASCADE NA FOREIGN KEY DO LIVRO
+    db.run(`
         CREATE TABLE IF NOT EXISTS avaliacoes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             usuarioId INTEGER NOT NULL,
@@ -33,7 +42,7 @@ db.serialize(() => {
                 REFERENCES usuarios(id),
 
             FOREIGN KEY(livroId)
-                REFERENCES livros(id)
+                REFERENCES livros(id) ON DELETE CASCADE
         )
     `);
 

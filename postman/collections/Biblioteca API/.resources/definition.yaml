@@ -1,0 +1,5 @@
+$kind: collection
+name: Biblioteca API
+variables:
+  - key: base_url
+    value: 'http://localhost:3000'
