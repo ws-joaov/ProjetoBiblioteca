@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel - Biblioteca</title>
+  <link rel="stylesheet" href="/styles/site.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="badge">B</div>
+        <div>
+          <h1>Painel da Biblioteca</h1>
+          <p>Visão geral do sistema, navegação e ações rápidas.</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="/painel/usuarios">Usuários</a>
+        <a href="/painel/livros">Livros</a>
+        <a href="/painel/avaliacoes">Avaliações</a>
+        <a href="/login">Login</a>
+      </nav>
+    </header>
+
+    <main class="main">
+      <section class="kpi-grid">
+        <article class="kpi"><strong>Usuários</strong><span>Gestão de contas e permissões.</span></article>
+        <article class="kpi"><strong>Livros</strong><span>Cadastro, detalhe e avaliações por obra.</span></article>
+        <article class="kpi"><strong>Avaliações</strong><span>Consulta e gestão centralizada.</span></article>
+      </section>
+
+      <section class="grid">
+        <article class="card tile-list">
+          <h2>Atalhos</h2>
+          <a class="tile" href="/painel/usuarios"><strong>Usuários</strong><small>Listar, filtrar por ID e ver perfil.</small></a>
+          <a class="tile" href="/painel/livros"><strong>Livros</strong><small>Detalhes de cada livro e avaliações relacionadas.</small></a>
+          <a class="tile" href="/painel/avaliacoes"><strong>Avaliações</strong><small>Visão geral das notas e comentários.</small></a>
+        </article>
+
+        <article class="card">
+          <h2>Como usar</h2>
+          <p>Faça login para obter o token, depois navegue pelas áreas com os botões superiores. Em cada tela, o sistema usa identificação por ID para detalhes, filtros e ações.</p>
+        </article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

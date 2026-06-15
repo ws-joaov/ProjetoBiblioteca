@@ -1,3 +1,5 @@
+const bcrypt = require("bcryptjs");
+
 const db = require("./dataBase");
 
 // 1. ATIVA O SUPORTE A FOREIGN KEYS E CASCADE NO SQLITE
@@ -10,9 +12,45 @@ db.serialize(() => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
-            admin INTEGER DEFAULT 0
+            admin INTEGER DEFAULT 0,
+            senha TEXT
         )
     `);
+
+    db.all("PRAGMA table_info(usuarios)", (err, columns) => {
+        if (err) {
+            console.error("Erro ao verificar colunas da tabela usuarios", err.message);
+            return;
+        }
+
+        const possuiSenha = columns.some(coluna => coluna.name === "senha");
+
+        if (!possuiSenha) {
+            db.run("ALTER TABLE usuarios ADD COLUMN senha TEXT", (alterErr) => {
+                if (alterErr) {
+                    console.error("Erro ao adicionar coluna senha", alterErr.message);
+                    return;
+                }
+
+                const senhaPadrao = bcrypt.hashSync("123456", 10);
+
+                db.run("UPDATE usuarios SET senha = ? WHERE senha IS NULL OR senha = ''", [senhaPadrao], (updateErr) => {
+                    if (updateErr) {
+                        console.error("Erro ao atualizar senha padrão", updateErr.message);
+                    }
+                });
+            });
+            return;
+        }
+
+        const senhaPadrao = bcrypt.hashSync("123456", 10);
+
+        db.run("UPDATE usuarios SET senha = ? WHERE senha IS NULL OR senha = ''", [senhaPadrao], (updateErr) => {
+            if (updateErr) {
+                console.error("Erro ao atualizar senha padrão", updateErr.message);
+            }
+        });
+    });
 
     db.run(`
         CREATE TABLE IF NOT EXISTS livros (

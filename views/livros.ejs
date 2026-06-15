@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Livros - Biblioteca</title>
+  <link rel="stylesheet" href="/styles/site.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="badge">L</div>
+        <div>
+          <h1>Livros</h1>
+          <p>Cadastro, detalhamento por ID e avaliações por obra.</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="/painel">Painel</a>
+        <a href="/painel/usuarios">Usuários</a>
+        <a href="/painel/avaliacoes">Avaliações</a>
+      </nav>
+    </header>
+
+    <main class="main">
+    <div class="grid">
+      <section class="card">
+        <h2>Criar livro</h2>
+        <p>Somente usuários administradores autenticados podem criar livros.</p>
+        <label class="label" for="usuarioId">ID do usuário admin</label>
+        <input class="input" id="usuarioId" type="number" placeholder="1" />
+        <label class="label" for="nome">Nome</label>
+        <input class="input" id="nome" type="text" placeholder="Pequeno Príncipe" />
+        <label class="label" for="autor">Autor</label>
+        <input class="input" id="autor" type="text" placeholder="Antoine de Saint-Exupéry" />
+        <label class="label" for="editora">Editora</label>
+        <input class="input" id="editora" type="text" placeholder="Glins" />
+        <label class="label" for="genero">Gênero</label>
+        <input class="input" id="genero" type="text" placeholder="Infantil" />
+        <button class="btn" type="button" onclick="criarLivro()">Criar livro</button>
+        <div id="livroStatus" class="status">Aguardando ação.</div>
+      </section>
+
+      <section class="card">
+        <h2>Listagem de livros</h2>
+        <p>Veja todos os livros cadastrados e abra detalhes por ID.</p>
+        <button class="btn secondary" type="button" onclick="listarLivros()">Listar livros</button>
+        <div class="table-wrap" style="margin-top:10px;">
+          <table>
+            <thead><tr><th>ID</th><th>Nome</th><th>Autor</th><th>Editora</th><th>Gênero</th></tr></thead>
+            <tbody id="livrosList"></tbody>
+          </table>
+        </div>
+        <div id="listaStatus" class="status" style="margin-top:10px;">Nenhuma consulta feita ainda.</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const tokenKey='biblioteca_token';
+    function getToken(){ return localStorage.getItem(tokenKey) || ''; }
+    async function api(path, options={}){
+      const token=getToken();
+      const headers={ 'Content-Type':'application/json', ...(options.headers||{}) };
+      if(token) headers['Authorization']='Bearer ' + token;
+      const response=await fetch(path, { ...options, headers });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok) throw new Error(data.erro || 'Erro na requisição');
+      return { response, data };
+    }
+    function setStatus(id, text, ok=true){ const el=document.getElementById(id); el.style.color=ok?'#fcd34d':'#fecaca'; el.textContent=text; }
+
+    async function criarLivro(){
+      try {
+        const { data } = await api('/api/livros', { method:'POST', body: JSON.stringify({ usuarioId:Number(document.getElementById('usuarioId').value), nome:document.getElementById('nome').value, autor:document.getElementById('autor').value, editora:document.getElementById('editora').value, genero:document.getElementById('genero').value }) });
+        setStatus('livroStatus', 'Livro criado: ' + data.nome, true);
+        listarLivros();
+      } catch (e) { setStatus('livroStatus', e.message, false); }
+    }
+
+    async function listarLivros(){
+      try {
+        const { data } = await api('/api/livros');
+        document.getElementById('livrosList').innerHTML = data.length ? data.map(l => `<tr><td>${l.id}</td><td>${l.nome}</td><td>${l.autor}</td><td>${l.editora}</td><td>${l.genero}</td></tr>`).join('') : '<tr><td colspan="5">Nenhum livro encontrado.</td></tr>';
+        setStatus('listaStatus', 'Livros carregados: ' + data.length, true);
+      } catch (e) { setStatus('listaStatus', e.message, false); }
+    }
+  </script>
+</body>
+</html>

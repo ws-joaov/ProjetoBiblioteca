@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avaliações - Biblioteca</title>
+  <link rel="stylesheet" href="/styles/site.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="badge">A</div>
+        <div>
+          <h1>Avaliações</h1>
+          <p>Consulta, criação e gestão de avaliações por ID.</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="/painel">Painel</a>
+        <a href="/painel/usuarios">Usuários</a>
+        <a href="/painel/livros">Livros</a>
+      </nav>
+    </header>
+
+    <main class="main">
+    <div class="grid">
+      <section class="card">
+        <h2>Nova avaliação</h2>
+        <p>Crie uma avaliação associada a um usuário e a um livro.</p>
+        <label class="label" for="usuarioId">ID do usuário</label>
+        <input class="input" id="usuarioId" type="number" placeholder="2" />
+        <label class="label" for="livroId">ID do livro</label>
+        <input class="input" id="livroId" type="number" placeholder="1" />
+        <label class="label" for="nota">Nota</label>
+        <input class="input" id="nota" type="number" min="0" max="5" placeholder="5" />
+        <label class="label" for="descricao">Descrição</label>
+        <textarea class="textarea" id="descricao" placeholder="Excelente leitura..."></textarea>
+        <button class="btn" type="button" onclick="criarAvaliacao()">Criar avaliação</button>
+        <div id="avaliacaoStatus" class="status">Aguardando ação.</div>
+      </section>
+
+      <section class="card">
+        <h2>Excluir avaliação</h2>
+        <p>Somente administradores podem remover avaliações inapropriadas.</p>
+        <label class="label" for="avaliacaoId">ID da avaliação</label>
+        <input class="input" id="avaliacaoId" type="number" placeholder="1" />
+        <button class="btn secondary" type="button" onclick="deletarAvaliacao()">Excluir avaliação</button>
+        <div id="deleteStatus" class="status">Aguardando exclusão.</div>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Listar avaliações</h2>
+      <p>Veja todas as avaliações já cadastradas.</p>
+      <button class="secondary" type="button" onclick="listarAvaliacoes()">Listar avaliações</button>
+      <div id="listaStatus" class="status">Nenhuma consulta feita ainda.</div>
+      <div id="avaliacoesList" class="list"></div>
+    </section>
+  </main>
+
+  <script>
+    const tokenKey='biblioteca_token';
+    function getToken(){ return localStorage.getItem(tokenKey) || ''; }
+    function setStatus(id, text, ok=true){ const el=document.getElementById(id); el.style.color=ok?'#fcd34d':'#fecaca'; el.textContent=text; }
+    async function api(path, options={}){
+      const token=getToken();
+      const headers={ 'Content-Type':'application/json', ...(options.headers||{}) };
+      if(token) headers['Authorization']='Bearer ' + token;
+      const response=await fetch(path, { ...options, headers });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok) throw new Error(data.erro || 'Erro na requisição');
+      return { response, data };
+    }
+
+    async function criarAvaliacao(){
+      try {
+        const { data } = await api('/api/avaliacoes', { method:'POST', body: JSON.stringify({ usuarioId:Number(document.getElementById('usuarioId').value), livroId:Number(document.getElementById('livroId').value), nota:Number(document.getElementById('nota').value), descricao:document.getElementById('descricao').value }) });
+        setStatus('avaliacaoStatus', 'Avaliação criada com sucesso.', true);
+        listarAvaliacoes();
+      } catch (e) { setStatus('avaliacaoStatus', e.message, false); }
+    }
+
+    async function listarAvaliacoes(){
+      try {
+        const { data } = await api('/api/avaliacoes');
+        document.getElementById('avaliacoesList').innerHTML = data.length ? data.map(a => `<tr><td>${a.id}</td><td>${a.usuario}</td><td>${a.livro}</td><td>${a.nota}</td><td>${a.descricao}</td></tr>`).join('') : '<tr><td colspan="5">Nenhuma avaliação encontrada.</td></tr>';
+        setStatus('listaStatus', 'Avaliações carregadas: ' + data.length, true);
+      } catch (e) { setStatus('listaStatus', e.message, false); }
+    }
+
+    async function deletarAvaliacao(){
+      try {
+        const id = document.getElementById('avaliacaoId').value;
+        const { response } = await api('/api/avaliacoes/' + id, { method:'DELETE' });
+        setStatus('deleteStatus', 'Avaliação removida com sucesso.', response.ok);
+        listarAvaliacoes();
+      } catch (e) { setStatus('deleteStatus', e.message, false); }
+    }
+  </script>
+</body>
+</html>

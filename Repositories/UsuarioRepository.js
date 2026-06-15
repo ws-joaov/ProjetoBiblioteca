@@ -5,8 +5,8 @@ class UsuarioRepository {
     async criar(usuario) {
         return new Promise((resolve, reject) => {
             db.run(
-                "INSERT INTO usuarios (nome, email, admin) VALUES (?, ?, ?)",
-                [usuario.nome, usuario.email, usuario.admin ? 1 : 0],
+                "INSERT INTO usuarios (nome, email, admin, senha) VALUES (?, ?, ?, ?)",
+                [usuario.nome, usuario.email, usuario.admin ? 1 : 0, usuario.senha || null],
                 function (err) {
                     if (err) {
                         return reject(err);
@@ -40,6 +40,25 @@ class UsuarioRepository {
     async buscarPorId(id) {
         return new Promise((resolve, reject) => {
             db.get("SELECT * FROM usuarios WHERE id = ?", [id], (err, row) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                if (!row) {
+                    return resolve(null);
+                }
+
+                resolve({
+                    ...row,
+                    admin: Boolean(row.admin)
+                });
+            });
+        });
+    }
+
+    async buscarPorEmail(email) {
+        return new Promise((resolve, reject) => {
+            db.get("SELECT * FROM usuarios WHERE email = ?", [email], (err, row) => {
                 if (err) {
                     return reject(err);
                 }

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usuários - Biblioteca</title>
+  <link rel="stylesheet" href="/styles/site.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="badge">U</div>
+        <div>
+          <h1>Usuários</h1>
+          <p>Login, cadastro, filtro por ID e perfil detalhado.</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="/painel">Painel</a>
+        <a href="/painel/livros">Livros</a>
+        <a href="/painel/avaliacoes">Avaliações</a>
+      </nav>
+    </header>
+
+    <main class="main">
+
+      <section class="grid panel-grid">
+        <article class="card">
+          <h2>Lista de usuários</h2>
+          <p>Use a tabela para visualizar rapidamente cada usuário e abrir detalhes por ID.</p>
+          <button class="btn" type="button" onclick="listarUsuarios()">Listar usuários</button>
+          <div class="table-wrap" style="margin-top:10px;">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Nome</th><th>E-mail</th><th>Admin</th><th>Ação</th></tr>
+              </thead>
+              <tbody id="usuariosList"></tbody>
+            </table>
+          </div>
+          <div id="usuariosStatus" class="status" style="margin-top:10px;">Aguardando consulta.</div>
+        </article>
+
+        <article class="card">
+          <h2>Perfil e avaliação</h2>
+          <p>Digite o ID para abrir o perfil do usuário com seus livros lidos e adicionar uma nova avaliação.</p>
+          <label class="label" for="perfilUsuarioId">ID do usuário</label>
+          <input class="input" id="perfilUsuarioId" type="number" placeholder="1" />
+          <button class="btn" type="button" onclick="abrirDetalhesUsuario(document.getElementById('perfilUsuarioId').value)">Ver detalhes</button>
+          <div id="perfilStatus" class="status">Aguardando seleção.</div>
+          <div id="perfilBox" class="tile-list"></div>
+        </article>
+      </section>
+
+      <section class="card">
+        <h2>Administração</h2>
+        <p>Promova um usuário para administrador quando necessário.</p>
+        <div class="grid">
+          <div>
+            <label class="label" for="adminUserId">ID do usuário</label>
+            <input class="input" id="adminUserId" type="number" placeholder="1" />
+          </div>
+          <div>
+            <label class="label">&nbsp;</label>
+            <button class="btn secondary" type="button" onclick="promoverAdmin()">Promover para admin</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const tokenKey = 'biblioteca_token';
+    function getToken(){ return localStorage.getItem(tokenKey) || ''; }
+    function saveToken(token){ localStorage.setItem(tokenKey, token); }
+    function setStatus(id, text, ok=true){ const el=document.getElementById(id); el.style.color=ok?'#fcd34d':'#fecaca'; el.textContent=text; }
+
+    async function api(path, options={}){
+      const headers = { 'Content-Type': 'application/json', ...(options.headers||{}) };
+      const token = getToken();
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      const response = await fetch(path, { ...options, headers });
+      const data = await response.json().catch(()=> ({}));
+      if (!response.ok) throw new Error(data.erro || 'Erro na requisição');
+      return { response, data };
+    }
+
+    async function loginUsuario(){
+      try {
+        const response = await fetch('/api/usuarios/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: document.getElementById('loginEmail').value, senha: document.getElementById('loginSenha').value }) });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.erro || 'Falha no login');
+        saveToken(data.token);
+        setStatus('loginStatus', 'Login realizado. Token salvo no localStorage.', true);
+        window.location.href = '/painel/usuarios';
+      } catch (e) { setStatus('loginStatus', e.message, false); }
+    }
+
+    async function registrarUsuario(){
+      try {
+        const response = await fetch('/api/usuarios', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ nome: document.getElementById('regNome').value, email: document.getElementById('regEmail').value, senha: document.getElementById('regSenha').value }) });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.erro || 'Erro ao cadastrar');
+        setStatus('registroStatus', 'Usuário criado com sucesso para ' + data.email, true);
+      } catch (e) { setStatus('registroStatus', e.message, false); }
+    }
+
+    async function listarUsuarios(){
+      try {
+        const { data } = await api('/api/usuarios');
+        const el = document.getElementById('usuariosList');
+        el.innerHTML = data.length ? data.map(u => `<tr><td>${u.id}</td><td>${u.nome}</td><td>${u.email}</td><td>${u.admin ? 'Sim' : 'Não'}</td><td><button class="btn ghost" type="button" onclick="abrirDetalhesUsuario(${u.id})">Detalhes</button></td></tr>`).join('') : '<tr><td colspan="5">Nenhum usuário encontrado.</td></tr>';
+        setStatus('usuariosStatus', 'Usuários carregados: ' + data.length, true);
+      } catch (e) { setStatus('usuariosStatus', e.message, false); }
+    }
+
+    function abrirDetalhesUsuario(id) {
+      if (!id) return;
+      window.open('/painel/usuarios/' + id, '_blank', 'noopener,noreferrer');
+    }
+
+    async function verDetalhesUsuario(id = Number(document.getElementById('perfilUsuarioId').value || 0)){
+      try {
+        if (!id) throw new Error('Informe um ID de usuário');
+        const { data } = await api('/api/usuarios/' + id);
+        document.getElementById('perfilBox').innerHTML = `
+          <article class="tile"><strong>${data.nome}</strong><small>${data.email}</small></article>
+          <article class="tile"><strong>Livros lidos</strong><small>${data.livrosLidos?.length || 0} registros encontrados.</small>
+            <div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>Livro</th><th>Nota</th><th>Descrição</th></tr></thead><tbody>${(data.livrosLidos || []).map(item => `<tr><td>${item.livro}</td><td>${item.nota}</td><td>${item.descricao}</td></tr>`).join('')}</tbody></table></div>
+          </article>
+          <article class="tile"><strong>Nova avaliação</strong><small>Adicione uma nova nota para esse usuário.</small>
+            <label class="label" for="livroIdPerfil">ID do livro</label>
+            <input class="input" id="livroIdPerfil" type="number" placeholder="1" />
+            <label class="label" for="notaPerfil">Nota</label>
+            <input class="input" id="notaPerfil" type="number" min="0" max="5" placeholder="5" />
+            <label class="label" for="descricaoPerfil">Descrição</label>
+            <textarea class="textarea" id="descricaoPerfil" placeholder="Excelente leitura..."></textarea>
+            <button class="btn" type="button" onclick="criarAvaliacaoPerfil(${id})">Salvar avaliação</button>
+          </article>`;
+        setStatus('perfilStatus', 'Perfil carregado para ' + data.nome, true);
+      } catch (e) { setStatus('perfilStatus', e.message, false); }
+    }
+
+    async function criarAvaliacaoPerfil(usuarioId){
+      try {
+        const { data } = await api('/api/avaliacoes', { method:'POST', body: JSON.stringify({ usuarioId, livroId: Number(document.getElementById('livroIdPerfil').value), nota: Number(document.getElementById('notaPerfil').value), descricao: document.getElementById('descricaoPerfil').value }) });
+        setStatus('perfilStatus', 'Avaliação criada com sucesso para #' + data.id, true);
+        verDetalhesUsuario(usuarioId);
+      } catch (e) { setStatus('perfilStatus', e.message, false); }
+    }
+
+    async function promoverAdmin(){
+      try {
+        const id = document.getElementById('adminUserId').value;
+        const { data } = await api('/api/usuarios/' + id + '/admin', { method:'PATCH' });
+        setStatus('usuariosStatus', 'Usuário promovido: ' + data.email, true);
+        listarUsuarios();
+      } catch (e) { setStatus('usuariosStatus', e.message, false); }
+    }
+  </script>
+</body>
+</html>

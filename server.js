@@ -27,6 +27,9 @@ const usuarioRoutes =
 const avaliacaoRoutes =
     require("./Router/avaliacaoRoutes");
 
+const webRouter =
+    require("./Router/webRouter");
+
 const LivroRepository =
     require("./Repositories/LivroRepository");
 
@@ -41,7 +44,10 @@ const livroRoutes =
 
 const app = express();
 
+app.set("view engine", "ejs");
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("Public"));
 
 /*
     REPOSITORIES
@@ -63,7 +69,8 @@ const livroRepository =
 const usuarioService =
     new UsuarioService(
         usuarioRepository,
-        avaliacaoRepository
+        avaliacaoRepository,
+        livroRepository
     );
 
 const avaliacaoService =
@@ -100,19 +107,21 @@ const livroController =
 */
 
 app.use(
-    "/usuarios",
+    "/api/usuarios",
     usuarioRoutes(usuarioController)
 );
 
 app.use(
-    "/avaliacoes",
+    "/api/avaliacoes",
     avaliacaoRoutes(avaliacaoController)
 );
 
 app.use(
-    "/livros",
+    "/api/livros",
     livroRoutes(livroController)
 );
+
+app.use("/painel", webRouter);
 
 app.listen(3000, () => {
     console.log("Servidor rodando");

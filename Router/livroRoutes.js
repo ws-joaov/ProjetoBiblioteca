@@ -1,16 +1,17 @@
 const express = require("express");
+const { verificarToken, exigirAdmin } = require("../auth");
 
 module.exports = (livroController) => {
 
     const router = express.Router();
 
-    router.post("/", livroController.criar);
+    router.post("/", verificarToken, exigirAdmin, livroController.criar);
 
-    router.get("/", livroController.listar);
+    router.get("/", verificarToken, livroController.listar);
 
-    router.get("/:id", livroController.buscarPorId);
+    router.get("/:id", verificarToken, livroController.buscarPorId);
 
-    router.delete("/:id", livroController.deletar);
+    router.delete("/:id", verificarToken, exigirAdmin, livroController.deletar);
 
     return router;
 };

@@ -1,3 +1,5 @@
+const { gerarToken } = require("../auth");
+
 class UsuarioController {
 
     constructor(usuarioService) {
@@ -29,6 +31,36 @@ class UsuarioController {
             await this.usuarioService.listar();
 
         return res.json(usuarios);
+
+    };
+
+    login = async (req, res) => {
+
+        try {
+
+            const usuario = await this.usuarioService.login(req.body);
+
+            const usuarioPublico = {
+                ...usuario,
+                senha: undefined
+            };
+
+            return res.json({
+                token: gerarToken({
+                    id: usuario.id,
+                    email: usuario.email,
+                    admin: usuario.admin
+                }),
+                usuario: usuarioPublico
+            });
+
+        } catch (error) {
+
+            return res.status(401).json({
+                erro: error.message
+            });
+
+        }
 
     };
 

@@ -20,7 +20,7 @@ class LivroService {
 
         const usuario =
             await this.usuarioRepository.buscarPorId(
-                dados.usuarioId
+                dados.id
             );
 
         if (!usuario) {

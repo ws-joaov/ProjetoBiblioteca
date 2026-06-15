@@ -1,4 +1,5 @@
 const express = require("express");
+const { verificarToken, exigirAdmin } = require("../auth");
 
 module.exports = (usuarioController) => {
 
@@ -6,11 +7,13 @@ module.exports = (usuarioController) => {
 
     router.post("/", usuarioController.criar);
 
-    router.get("/", usuarioController.listar);
+    router.post("/login", usuarioController.login);
 
-    router.get("/:id", usuarioController.buscarPorId);
+    router.get("/", verificarToken, usuarioController.listar);
 
-    router.patch("/:id/admin",usuarioController.alterarAdmin);
+    router.get("/:id", verificarToken, usuarioController.buscarPorId);
+
+    router.patch("/:id/admin", verificarToken, exigirAdmin, usuarioController.alterarAdmin);
 
     return router;
 };

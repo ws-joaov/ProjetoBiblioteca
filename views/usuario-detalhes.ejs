@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalhes do usuário - Biblioteca</title>
+  <link rel="stylesheet" href="/styles/site.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="badge">D</div>
+        <div>
+          <h1>Detalhes do usuário</h1>
+          <p>Visualize os dados do usuário e suas avaliações relacionadas.</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="/painel/usuarios">Voltar para usuários</a>
+      </nav>
+    </header>
+
+    <main class="main">
+      <section class="card">
+        <h2>Perfil</h2>
+        <div id="detalhesStatus" class="status">Carregando...</div>
+        <div id="detalhesBox" class="tile-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const tokenKey = 'biblioteca_token';
+    function getToken(){ return localStorage.getItem(tokenKey) || ''; }
+
+    async function api(path) {
+      const token = getToken();
+      const response = await fetch(path, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: 'Bearer ' + token } : {})
+        }
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.erro || 'Erro ao buscar detalhes');
+      return data;
+    }
+
+    async function carregarDetalhes() {
+      try {
+        const id = '<%= usuarioId %>';
+        const data = await api('/api/usuarios/' + id);
+        document.getElementById('detalhesBox').innerHTML = `
+          <article class="tile"><strong>ID</strong><small>#${data.id}</small></article>
+          <article class="tile"><strong>Nome</strong><small>${data.nome}</small></article>
+          <article class="tile"><strong>E-mail</strong><small>${data.email}</small></article>
+          <article class="tile"><strong>Livros lidos</strong><small>${data.livrosLidos?.length || 0} registros.</small>
+            <div class="table-wrap" style="margin-top:8px;">
+              <table>
+                <thead>
+                  <tr><th>Livro</th><th>Nota</th><th>Descrição</th></tr>
+                </thead>
+                <tbody>
+                  ${(data.livrosLidos || []).map(item => `<tr><td>${item.livro}</td><td>${item.nota}</td><td>${item.descricao}</td></tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          </article>`;
+        document.getElementById('detalhesStatus').textContent = 'Detalhes carregados para o usuário #' + id;
+      } catch (e) {
+        document.getElementById('detalhesStatus').textContent = e.message;
+        document.getElementById('detalhesStatus').style.color = '#fecaca';
+      }
+    }
+
+    carregarDetalhes();
+  </script>
+</body>
+</html>
