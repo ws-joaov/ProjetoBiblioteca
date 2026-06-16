@@ -17,7 +17,7 @@
         </div>
       </div>
       <nav class="nav">
-        <a href="/painel/usuarios">Voltar para usuários</a>
+        <a href="/usuarios">Voltar para usuários</a>
       </nav>
     </header>
 
@@ -36,6 +36,9 @@
 
     async function api(path) {
       const token = getToken();
+      if (!token) {
+        window.location.href = '/login';
+      }
       const response = await fetch(path, {
         headers: {
           'Content-Type': 'application/json',
@@ -55,6 +58,7 @@
           <article class="tile"><strong>ID</strong><small>#${data.id}</small></article>
           <article class="tile"><strong>Nome</strong><small>${data.nome}</small></article>
           <article class="tile"><strong>E-mail</strong><small>${data.email}</small></article>
+          <article class="tile"><strong>Admin</strong><small>${data.admin ? 'Sim' : 'Não'}</small></article>
           <article class="tile"><strong>Livros lidos</strong><small>${data.livrosLidos?.length || 0} registros.</small>
             <div class="table-wrap" style="margin-top:8px;">
               <table>
@@ -66,11 +70,37 @@
                 </tbody>
               </table>
             </div>
+          </article>
+          <article class="tile"><strong>Ações</strong><small>Promova este usuário para administrador.</small>
+            <button class="btn secondary" type="button" onclick="promoverAdmin(${data.id})">Promover para admin</button>
+            <div id="promoStatus" class="status" style="margin-top:10px;">Aguardando ação.</div>
           </article>`;
         document.getElementById('detalhesStatus').textContent = 'Detalhes carregados para o usuário #' + id;
       } catch (e) {
         document.getElementById('detalhesStatus').textContent = e.message;
         document.getElementById('detalhesStatus').style.color = '#fecaca';
+      }
+    }
+
+    async function promoverAdmin(id) {
+      const promoStatus = document.getElementById('promoStatus');
+      try {
+        const token = getToken();
+        const response = await fetch('/api/usuarios/' + id + '/admin', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: 'Bearer ' + token } : {})
+          }
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.erro || 'Falha ao promover usuário');
+        promoStatus.textContent = 'Usuário promovido: ' + data.email;
+        promoStatus.style.color = '#86efac';
+        carregarDetalhes();
+      } catch (e) {
+        promoStatus.textContent = e.message;
+        promoStatus.style.color = '#fecaca';
       }
     }
 

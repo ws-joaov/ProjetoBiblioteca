@@ -11,7 +11,7 @@
     <div class="grid" style="width:min(1100px, 96vw);">
     <section class="panel">
       <span class="badge-pill">Login</span>
-      <h1>Bem-vindo ao painel da biblioteca</h1>
+      <h1>Bem-vindo à biblioteca</h1>
       <p>Faça login para obter seu token JWT e usar as rotas protegidas, como criação de livros e exclusão de avaliações.</p>
       <form id="loginForm">
         <label class="label" for="email">E-mail</label>
@@ -23,8 +23,8 @@
         <button class="btn" type="submit">Entrar</button>
       </form>
       <div id="tokenBox" class="status" hidden></div>
-      <p class="small">Se preferir, vá direto para o painel completo com todas as funcionalidades.</p>
-      <button class="btn secondary" type="button" onclick="location.href='/painel/usuarios'">Abrir painel de usuários</button>
+      <p class="small">Após o login, use os links para acessar usuários, livros e avaliações.</p>
+      <button class="btn secondary" type="button" onclick="location.href='/usuarios'">Ir para usuários</button>
     </section>
 
     <section class="card">
@@ -77,7 +77,7 @@
       tokenBox.hidden = false;
       tokenBox.textContent = 'Token JWT: ' + data.token;
       localStorage.setItem('biblioteca_token', data.token);
-      window.location.href = '/painel/usuarios';
+      window.location.href = '/usuarios';
     });
 
     registerForm.addEventListener('submit', async (event) => {

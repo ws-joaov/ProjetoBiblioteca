@@ -123,8 +123,6 @@ app.use(
     livroRoutes(livroController)
 );
 
-app.use("/painel", webRouter);
-
 app.listen(3000, () => {
     console.log("Servidor rodando");
 });

@@ -93,20 +93,16 @@ class AvaliacaoService {
     }
 
     async deletar(id, usuarioIdLogado, isAdmin) {
-        // 1. Procurar a avaliação no banco para saber a quem ela pertence
         const avaliacao = await this.avaliacaoRepository.buscarPorId(id);
 
         if (!avaliacao) {
             throw new Error("Avaliação não encontrada");
         }
 
-        // 2. A Trava de Permissões Cruzadas (A Regra de Ouro)
-        // Se o utilizador logado NÃO for o dono da avaliação E também NÃO for administrador, o acesso é bloqueado.
-        if (avaliacao.usuarioId !== usuarioIdLogado && !isAdmin) {
-            throw new Error("Acesso negado: Apenas o autor ou um administrador podem remover esta avaliação.");
+        if (!isAdmin) {
+            throw new Error("Acesso negado: Apenas administradores podem remover avaliações.");
         }
 
-        // 3. Se a execução chegar aqui, a pessoa é o dono ou é um admin. A exclusão é autorizada.
         return await this.avaliacaoRepository.deletar(id);
     }
 

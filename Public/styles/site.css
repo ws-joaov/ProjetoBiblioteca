@@ -39,6 +39,7 @@ button, input, textarea, select { font: inherit; }
 .textarea { min-height:86px; resize: vertical; }
 .btn { width:100%; border:0; border-radius:10px; padding:10px 12px; background: linear-gradient(135deg, var(--accent-2), var(--accent)); color:#111827; cursor:pointer; font-weight:800; }
 .btn.secondary { background:#fff; color:#111827; }
+.btn.danger { background:#dc2626; color:#fff; }
 .btn.ghost { background: rgba(255,255,255,0.08); color:#fff; border:1px solid var(--line); }
 
 .status { border-radius:10px; padding:10px 12px; background:#111827; border:1px solid var(--line); color:#fcd34d; font-size:.95rem; }

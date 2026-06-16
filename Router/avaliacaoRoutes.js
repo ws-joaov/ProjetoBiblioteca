@@ -1,5 +1,5 @@
 const express = require("express");
-const { verificarToken } = require("../auth");
+const { verificarToken, exigirAdmin } = require("../auth");
 
 module.exports = (avaliacaoController) => {
 
@@ -7,7 +7,7 @@ module.exports = (avaliacaoController) => {
 
     router.post("/", verificarToken, avaliacaoController.criar);
     router.get("/", verificarToken, avaliacaoController.listar);
-    router.delete('/:id', verificarToken, avaliacaoController.deletar);
+    router.delete('/:id', verificarToken, exigirAdmin, avaliacaoController.deletar);
 
     return router;
 };

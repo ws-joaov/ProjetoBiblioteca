@@ -17,9 +17,9 @@
         </div>
       </div>
       <nav class="nav">
-        <a href="/painel">Painel</a>
-        <a href="/painel/usuarios">Usuários</a>
-        <a href="/painel/avaliacoes">Avaliações</a>
+        <a href="/usuarios">Usuários</a>
+        <a href="/livros">Livros</a>
+        <a href="/avaliacoes">Avaliações</a>
       </nav>
     </header>
 
@@ -46,7 +46,7 @@
         <button class="btn secondary" type="button" onclick="listarLivros()">Listar livros</button>
         <div class="table-wrap" style="margin-top:10px;">
           <table>
-            <thead><tr><th>ID</th><th>Nome</th><th>Autor</th><th>Editora</th><th>Gênero</th></tr></thead>
+            <thead><tr><th>ID</th><th>Nome</th><th>Autor</th><th>Editora</th><th>Gênero</th><th>Ação</th></tr></thead>
             <tbody id="livrosList"></tbody>
           </table>
         </div>
@@ -60,6 +60,9 @@
     function getToken(){ return localStorage.getItem(tokenKey) || ''; }
     async function api(path, options={}){
       const token=getToken();
+      if (!token) {
+        window.location.href = '/login';
+      }
       const headers={ 'Content-Type':'application/json', ...(options.headers||{}) };
       if(token) headers['Authorization']='Bearer ' + token;
       const response=await fetch(path, { ...options, headers });
@@ -92,9 +95,14 @@ async function criarLivro() {
     async function listarLivros(){
       try {
         const { data } = await api('/api/livros');
-        document.getElementById('livrosList').innerHTML = data.length ? data.map(l => `<tr><td>${l.id}</td><td>${l.nome}</td><td>${l.autor}</td><td>${l.editora}</td><td>${l.genero}</td></tr>`).join('') : '<tr><td colspan="5">Nenhum livro encontrado.</td></tr>';
+        document.getElementById('livrosList').innerHTML = data.length ? data.map(l => `<tr><td>${l.id}</td><td>${l.nome}</td><td>${l.autor}</td><td>${l.editora}</td><td>${l.genero}</td><td><button class="btn ghost" type="button" onclick="abrirDetalhesLivro(${l.id})">Detalhes</button></td></tr>`).join('') : '<tr><td colspan="6">Nenhum livro encontrado.</td></tr>';
         setStatus('listaStatus', 'Livros carregados: ' + data.length, true);
       } catch (e) { setStatus('listaStatus', e.message, false); }
+    }
+
+    function abrirDetalhesLivro(id) {
+      if (!id) return;
+      window.open('/livros/' + id, '_blank', 'noopener,noreferrer');
     }
     // Automação: Carrega a tabela assim que a tela abre
     document.addEventListener("DOMContentLoaded", () => {

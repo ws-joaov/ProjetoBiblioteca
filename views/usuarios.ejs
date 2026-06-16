@@ -17,9 +17,9 @@
         </div>
       </div>
       <nav class="nav">
-        <a href="/painel">Painel</a>
-        <a href="/painel/livros">Livros</a>
-        <a href="/painel/avaliacoes">Avaliações</a>
+        <a href="/usuarios">Usuários</a>
+        <a href="/livros">Livros</a>
+        <a href="/avaliacoes">Avaliações</a>
       </nav>
     </header>
 
@@ -52,20 +52,6 @@
         </article>
       </section>
 
-      <section class="card">
-        <h2>Administração</h2>
-        <p>Promova um usuário para administrador quando necessário.</p>
-        <div class="grid">
-          <div>
-            <label class="label" for="adminUserId">ID do usuário</label>
-            <input class="input" id="adminUserId" type="number" placeholder="1" />
-          </div>
-          <div>
-            <label class="label">&nbsp;</label>
-            <button class="btn secondary" type="button" onclick="promoverAdmin()">Promover para admin</button>
-          </div>
-        </div>
-      </section>
     </main>
   </div>
 
@@ -76,8 +62,11 @@
     function setStatus(id, text, ok=true){ const el=document.getElementById(id); el.style.color=ok?'#fcd34d':'#fecaca'; el.textContent=text; }
 
     async function api(path, options={}){
-      const headers = { 'Content-Type': 'application/json', ...(options.headers||{}) };
       const token = getToken();
+      if (!token) {
+        window.location.href = '/login';
+      }
+      const headers = { 'Content-Type': 'application/json', ...(options.headers||{}) };
       if (token) headers['Authorization'] = 'Bearer ' + token;
       const response = await fetch(path, { ...options, headers });
       const data = await response.json().catch(()=> ({}));
@@ -92,7 +81,7 @@
         if (!response.ok) throw new Error(data.erro || 'Falha no login');
         saveToken(data.token);
         setStatus('loginStatus', 'Login realizado. Token salvo no localStorage.', true);
-        window.location.href = '/painel/usuarios';
+        window.location.href = '/usuarios';
       } catch (e) { setStatus('loginStatus', e.message, false); }
     }
 
@@ -116,7 +105,7 @@
 
     function abrirDetalhesUsuario(id) {
       if (!id) return;
-      window.open('/painel/usuarios/' + id, '_blank', 'noopener,noreferrer');
+      window.open('/usuarios/' + id, '_blank', 'noopener,noreferrer');
     }
 
     async function verDetalhesUsuario(id = Number(document.getElementById('perfilUsuarioId').value || 0)){
@@ -149,14 +138,6 @@
       } catch (e) { setStatus('perfilStatus', e.message, false); }
     }
 
-    async function promoverAdmin(){
-      try {
-        const id = document.getElementById('adminUserId').value;
-        const { data } = await api('/api/usuarios/' + id + '/admin', { method:'PATCH' });
-        setStatus('usuariosStatus', 'Usuário promovido: ' + data.email, true);
-        listarUsuarios();
-      } catch (e) { setStatus('usuariosStatus', e.message, false); }
-    }
   </script>
   <script src="/js/usuarios.js"></script>
 </body>

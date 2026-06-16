@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 router.get("/", (req, res) => {
-    res.render("painel");
+    res.render("login");
 });
 
 router.get("/login", (req, res) => {
@@ -20,6 +20,10 @@ router.get("/usuarios/:id", (req, res) => {
 
 router.get("/livros", (req, res) => {
     res.render("livros");
+});
+
+router.get("/livros/:id", (req, res) => {
+    res.render("livro-detalhes", { livroId: req.params.id });
 });
 
 router.get("/avaliacoes", (req, res) => {

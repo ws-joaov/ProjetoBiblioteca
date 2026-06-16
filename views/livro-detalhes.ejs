@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalhes do livro - Biblioteca</title>
+  <link rel="stylesheet" href="/styles/site.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="badge">L</div>
+        <div>
+          <h1>Detalhes do livro</h1>
+          <p>Veja os dados da obra, suas avaliações e exclua o livro se necessário.</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="/livros">Voltar para livros</a>
+      </nav>
+    </header>
+
+    <main class="main">
+      <section class="card">
+        <h2>Informações do livro</h2>
+        <div id="detalhesStatus" class="status">Carregando...</div>
+        <div id="detalhesBox" class="tile-list" style="margin-top:12px;"></div>
+      </section>
+
+      <section class="card">
+        <h2>Avaliações da obra</h2>
+        <p>Confira todas as avaliações registradas para este livro.</p>
+        <div class="table-wrap" style="margin-top:10px;">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Usuário</th><th>Nota</th><th>Descrição</th></tr>
+            </thead>
+            <tbody id="avaliacoesLivroList"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Excluir livro</h2>
+        <p>Somente administradores podem excluir um livro e suas avaliações associadas.</p>
+        <button class="btn secondary" type="button" onclick="deletarLivro()">Excluir este livro</button>
+        <div id="deleteLivroStatus" class="status">Aguardando ação.</div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const tokenKey = 'biblioteca_token';
+    function getToken(){ return localStorage.getItem(tokenKey) || ''; }
+
+    async function api(path, options={}){
+      const token = getToken();
+      if (!token) {
+        window.location.href = '/login';
+      }
+      const headers = { 'Content-Type': 'application/json', ...(options.headers||{}) };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      const response = await fetch(path, { ...options, headers });
+      const data = await response.json().catch(()=> ({}));
+      if (!response.ok) throw new Error(data.erro || 'Erro na requisição');
+      return { response, data };
+    }
+
+    function setStatus(id, text, ok=true){
+      const el = document.getElementById(id);
+      el.style.color = ok ? '#fcd34d' : '#fecaca';
+      el.textContent = text;
+    }
+
+    async function carregarDetalhesLivro(){
+      try {
+        const livroId = '<%= livroId %>';
+        const { data } = await api('/api/livros/' + livroId);
+        const detalhesBox = document.getElementById('detalhesBox');
+
+        detalhesBox.innerHTML = `
+          <article class="tile"><strong>ID</strong><small>#${data.id}</small></article>
+          <article class="tile"><strong>Nome</strong><small>${data.nome}</small></article>
+          <article class="tile"><strong>Autor</strong><small>${data.autor}</small></article>
+          <article class="tile"><strong>Editora</strong><small>${data.editora}</small></article>
+          <article class="tile"><strong>Gênero</strong><small>${data.genero}</small></article>
+          <article class="tile"><strong>Avaliações</strong><small>${(data.avaliacoes || []).length} registro(s)</small></article>
+        `;
+
+        const lista = document.getElementById('avaliacoesLivroList');
+        lista.innerHTML = (data.avaliacoes || []).length
+          ? data.avaliacoes.map(av => `<tr><td>${av.id}</td><td>${av.usuario}</td><td>${av.nota}</td><td>${av.descricao}</td></tr>`).join('')
+          : '<tr><td colspan="4">Nenhuma avaliação encontrada para este livro.</td></tr>';
+
+        setStatus('detalhesStatus', 'Detalhes carregados para o livro #' + livroId, true);
+      } catch (e) {
+        setStatus('detalhesStatus', e.message, false);
+        document.getElementById('avaliacoesLivroList').innerHTML = '<tr><td colspan="4">Não foi possível carregar avaliações.</td></tr>';
+      }
+    }
+
+    async function deletarLivro(){
+      try {
+        const livroId = '<%= livroId %>';
+        const { response } = await api('/api/livros/' + livroId, { method:'DELETE' });
+        setStatus('deleteLivroStatus', 'Livro excluído com sucesso.', response.ok);
+        if (response.ok) {
+          setTimeout(() => { window.location.href = '/livros'; }, 600);
+        }
+      } catch (e) {
+        setStatus('deleteLivroStatus', e.message, false);
+      }
+    }
+
+    carregarDetalhesLivro();
+  </script>
+</body>
+</html>

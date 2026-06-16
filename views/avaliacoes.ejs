@@ -17,9 +17,9 @@
         </div>
       </div>
       <nav class="nav">
-        <a href="/painel">Painel</a>
-        <a href="/painel/usuarios">Usuários</a>
-        <a href="/painel/livros">Livros</a>
+        <a href="/usuarios">Usuários</a>
+        <a href="/livros">Livros</a>
+        <a href="/avaliacoes">Avaliações</a>
       </nav>
     </header>
 
@@ -27,9 +27,12 @@
     <div class="grid">
       <section class="card">
         <h2>Nova avaliação</h2>
-        <p>Crie uma avaliação associada a um usuário e a um livro.</p>
-        <label class="label" for="livroId">ID do livro</label>
-        <input class="input" id="livroId" type="number" placeholder="1" />
+        <p>Crie uma avaliação escolhendo o livro diretamente da lista.</p>
+        <label class="label" for="livroSelecionado">Livro</label>
+        <select class="input" id="livroSelecionado">
+          <option value="">Selecione um livro</option>
+        </select>
+
         <label class="label" for="nota">Nota</label>
         <input class="input" id="nota" type="number" min="0" max="5" placeholder="5" />
         <label class="label" for="descricao">Descrição</label>
@@ -38,14 +41,6 @@
         <div id="avaliacaoStatus" class="status">Aguardando ação.</div>
       </section>
 
-      <section class="card">
-        <h2>Excluir avaliação</h2>
-        <p>Somente administradores podem remover avaliações inapropriadas.</p>
-        <label class="label" for="avaliacaoId">ID da avaliação</label>
-        <input class="input" id="avaliacaoId" type="number" placeholder="1" />
-        <button class="btn secondary" type="button" onclick="deletarAvaliacao()">Excluir avaliação</button>
-        <div id="deleteStatus" class="status">Aguardando exclusão.</div>
-      </section>
     </div>
 
 <section class="card">
@@ -61,6 +56,7 @@
               <th>Livro</th>
               <th>Nota</th>
               <th>Descrição</th>
+              <th>Ação</th>
             </tr>
           </thead>
           <tbody id="avaliacoesList"></tbody>
@@ -68,6 +64,7 @@
       </div>
       
       <div id="listaStatus" class="status" style="margin-top:10px;">Aguardando consulta.</div>
+      <div id="deleteStatus" class="status" style="margin-top:10px;">Aguardando ação de exclusão.</div>
     </section>
   </main>
 
@@ -77,6 +74,9 @@
     function setStatus(id, text, ok=true){ const el=document.getElementById(id); el.style.color=ok?'#fcd34d':'#fecaca'; el.textContent=text; }
     async function api(path, options={}){
       const token=getToken();
+      if (!token) {
+        window.location.href = '/login';
+      }
       const headers={ 'Content-Type':'application/json', ...(options.headers||{}) };
       if(token) headers['Authorization']='Bearer ' + token;
       const response=await fetch(path, { ...options, headers });
@@ -87,11 +87,15 @@
 
     async function criarAvaliacao() {
       try {
-        // A chamada à API é mantida, apenas removemos o usuarioId do JSON
+        const livroId = Number(document.getElementById('livroSelecionado').value);
+        if (!livroId) {
+          throw new Error('Selecione um livro antes de criar a avaliação.');
+        }
+
         const { data } = await api('/api/avaliacoes', { 
             method: 'POST', 
             body: JSON.stringify({ 
-                livroId: Number(document.getElementById('livroId').value), 
+                livroId,
                 nota: Number(document.getElementById('nota').value), 
                 descricao: document.getElementById('descricao').value 
             }) 
@@ -99,23 +103,33 @@
         
         setStatus('avaliacaoStatus', 'Avaliação criada com sucesso.', true);
         listarAvaliacoes(); // Recarrega a tabela
-        
+        carregarLivrosParaSelecao();
       } catch (e) { 
         setStatus('avaliacaoStatus', e.message, false); 
+      }
+    }
+
+    async function carregarLivrosParaSelecao() {
+      try {
+        const { data } = await api('/api/livros');
+        const select = document.getElementById('livroSelecionado');
+        select.innerHTML = `<option value="">Selecione um livro</option>${data.map(l => `<option value="${l.id}">#${l.id} - ${l.nome}</option>`).join('')}`;
+      } catch (e) {
+        document.getElementById('avaliacaoStatus').textContent = e.message;
+        document.getElementById('avaliacaoStatus').style.color = '#fecaca';
       }
     }
 
     async function listarAvaliacoes(){
       try {
         const { data } = await api('/api/avaliacoes');
-        document.getElementById('avaliacoesList').innerHTML = data.length ? data.map(a => `<tr><td>${a.id}</td><td>${a.usuario}</td><td>${a.livro}</td><td>${a.nota}</td><td>${a.descricao}</td></tr>`).join('') : '<tr><td colspan="5">Nenhuma avaliação encontrada.</td></tr>';
+        document.getElementById('avaliacoesList').innerHTML = data.length ? data.map(a => `<tr><td>${a.id}</td><td>${a.usuario}</td><td>${a.livro}</td><td>${a.nota}</td><td>${a.descricao}</td><td><button class="btn danger" type="button" onclick="deletarAvaliacao(${a.id})">Excluir</button></td></tr>`).join('') : '<tr><td colspan="6">Nenhuma avaliação encontrada.</td></tr>';
         setStatus('listaStatus', 'Avaliações carregadas: ' + data.length, true);
       } catch (e) { setStatus('listaStatus', e.message, false); }
     }
 
-    async function deletarAvaliacao(){
+    async function deletarAvaliacao(id){
       try {
-        const id = document.getElementById('avaliacaoId').value;
         const { response } = await api('/api/avaliacoes/' + id, { method:'DELETE' });
         setStatus('deleteStatus', 'Avaliação removida com sucesso.', response.ok);
         listarAvaliacoes();
@@ -123,6 +137,7 @@
     }
     // Automação: Carrega a tabela assim que a tela abre
     document.addEventListener("DOMContentLoaded", () => {
+        carregarLivrosParaSelecao();
         if (typeof listarAvaliacoes === 'function') {
             listarAvaliacoes();
         }
