@@ -44,16 +44,17 @@
         <h2>Listagem de livros</h2>
         <p>Veja todos os livros cadastrados e abra detalhes por ID.</p>
         <button class="btn secondary" type="button" onclick="listarLivros()">Listar livros</button>
-        <div class="table-wrap" style="margin-top:10px;">
+        <div class="table-wrap">
           <table>
             <thead><tr><th>ID</th><th>Nome</th><th>Autor</th><th>Editora</th><th>Gênero</th></tr></thead>
             <tbody id="livrosList"></tbody>
           </table>
         </div>
-        <div id="listaStatus" class="status" style="margin-top:10px;">Nenhuma consulta feita ainda.</div>
+        <div id="listaStatus" class="status">Nenhuma consulta feita ainda.</div>
       </section>
     </div>
   </main>
+  </div>
 
   <script>
     const tokenKey='biblioteca_token';
