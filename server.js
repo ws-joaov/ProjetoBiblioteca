@@ -123,6 +123,11 @@ app.use(
     livroRoutes(livroController)
 );
 
-app.listen(3000, () => {
-    console.log("Servidor rodando");
+app.use("/painel", webRouter);
+
+// O servidor vai usar a porta da Nuvem ou a 3000 se estiver no seu PC
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
