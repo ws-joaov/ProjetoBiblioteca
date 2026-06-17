@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+*.log
+biblioteca.db
+data
+.postman
+postman

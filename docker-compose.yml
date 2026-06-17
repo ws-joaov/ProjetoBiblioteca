@@ -1,0 +1,15 @@
+services:
+  biblioteca:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_PATH: /data/biblioteca.db
+      JWT_SECRET: altere-este-segredo-em-producao
+    volumes:
+      - biblioteca_data:/data
+
+volumes:
+  biblioteca_data:
